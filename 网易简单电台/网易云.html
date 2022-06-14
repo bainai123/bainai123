@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网易云</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            cursor: pointer;
+        }
+
+        img {
+            width: 150px;
+            height: 150px;
+        }
+
+        .box {
+            width: 1200px;
+            margin: 50px auto;
+            /* border: 1px solid #000; */
+            display: flex;
+            font-size: 12px;
+        }
+
+
+
+        .left {
+            width: 800px;
+        }
+
+        .top>ul {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .top>ul li {
+            padding-bottom: 20px;
+        }
+
+        .top>ul p {
+            padding: 10px 0;
+            text-align: center;
+            background-color: #c3c6d6;
+        }
+
+
+        .bot img {
+
+            width: 80px;
+            height: 80px;
+        }
+
+        .bot li {
+            display: flex;
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #9ba487;
+
+        }
+
+        .bot .info {
+            padding-left: 20px;
+            width: 500px;
+        }
+
+        .bot .info p.name {
+            color: #393d5a;
+            line-height: 40px;
+        }
+
+
+
+        .right {
+            position: relative;
+            width: 300px;
+
+
+        }
+
+        audio {
+            position: fixed;
+            top: 50%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div class="box">
+            <div class="left">
+                <div class="top">
+                    <ul>
+                        <li v-for="dj in djList" @click="clickDj(dj.id) ">
+                            <img :src="dj.picUrl" alt="">
+
+                            <p>{{dj.name}}</p>
+                        </li>
+                    </ul>
+                </div>
+                <div class="bot">
+                    <ul>
+                        <li v-for="song in songList" @click="play(song.mainSong.id)">
+                            <img :src="song.coverUrl" alt="">
+                            <div class="info">
+                                <p class="name">{{song.name}}</p>
+                                <p>{{song.description}}</p>
+                            </div>
+
+
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+
+            <div class="right">
+                <audio :src="ul" ref="audio" controls></audio>
+            </div>
+
+        </div>
+
+    </div>
+</body>
+
+<script src="./lib/vue.global.js"></script>
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                djList: [],
+                songList: [],
+                ul: ''
+            }
+        },
+        created() {
+            this.getDjList();
+        },
+        methods: {
+            async getDjList() {
+                const url = `https://autumnfish.cn/dj/recommend`
+                const data = await fetch(url).then(res => res.json()
+                );
+                console.log(data)
+                this.djList = data.djRadios
+            },
+            async clickDj(id) {
+                // 965024140
+                const url = `https://autumnfish.cn/dj/program?rid=${id}`
+                // const url = `https://autumnfish.cn/dj/program?rid=965024140`
+                const data = await fetch(url).then(res => res.json()
+                );
+                console.log(data)
+                this.songList = data.programs.reverse()
+                console.log(this.songList);
+            },
+            async play(id) {
+                const url = `https://autumnfish.cn/song/url?id=${id}`
+                const data = await fetch(url).then(res => res.json()
+                );
+                console.log(data.data);
+                this.ul = data.data.url
+                console.log(this.ul)
+                this.$nextTick(() => {
+                    this.$refs.audio.play();
+
+                })
+            }
+        }
+    })
+    const vm = app.mount("#app")
+</script>
+
+</html>
